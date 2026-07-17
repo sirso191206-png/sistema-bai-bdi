@@ -1,0 +1,343 @@
+/* =========================================================================
+   Sistema BAI / BDI-II — Estilos del panel clínico
+   Paleta: Azul #1E5F8C · Blanco · Gris · Verde · Rojo
+   ========================================================================= */
+
+:root {
+  --azul: #1E5F8C;
+  --azul-oscuro: #164560;
+  --azul-claro: #EAF2F8;
+  --gris-fondo: #F4F6F8;
+  --gris-borde: #E1E5EA;
+  --gris-texto: #5A6572;
+  --verde: #1E8C5A;
+  --verde-claro: #E7F6EE;
+  --amarillo: #C98A1D;
+  --amarillo-claro: #FBF1DF;
+  --naranja: #C9601D;
+  --naranja-claro: #FCEBDF;
+  --rojo: #C4293B;
+  --rojo-claro: #FCE9EB;
+  --texto-principal: #1F2937;
+  --sombra: 0 1px 3px rgba(20, 40, 60, 0.08), 0 1px 2px rgba(20, 40, 60, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--gris-fondo);
+  color: var(--texto-principal);
+  min-height: 100vh;
+}
+
+/* ---------- Barra lateral ---------- */
+.barra-lateral {
+  width: 250px;
+  min-height: 100vh;
+  background: var(--azul-oscuro);
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 1030;
+  transition: transform 0.2s ease;
+}
+
+.marca-sistema {
+  padding: 1.5rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.marca-sistema h1 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+.marca-sistema span {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.6);
+}
+
+.nav-lateral {
+  padding: 1rem 0.75rem;
+  flex: 1;
+}
+
+.nav-lateral .nav-link {
+  color: rgba(255,255,255,0.75);
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  margin-bottom: 0.2rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-lateral .nav-link:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.nav-lateral .nav-link.activo {
+  background: var(--azul);
+  color: #fff;
+}
+
+.nav-lateral .nav-link i { width: 18px; text-align: center; }
+
+/* ---------- Contenido principal ---------- */
+.contenido-principal {
+  margin-left: 250px;
+  padding: 1.75rem 2rem 3rem;
+}
+
+.encabezado-pagina {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.encabezado-pagina h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.encabezado-pagina p {
+  color: var(--gris-texto);
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+/* ---------- Tarjetas de estadísticas ---------- */
+.tarjeta-stat {
+  background: #fff;
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: var(--sombra);
+  height: 100%;
+}
+
+.tarjeta-stat .valor {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tarjeta-stat .etiqueta {
+  font-size: 0.8rem;
+  color: var(--gris-texto);
+  margin-top: 0.4rem;
+  font-weight: 500;
+}
+
+.tarjeta-stat.borde-azul { border-left: 4px solid var(--azul); }
+.tarjeta-stat.borde-verde { border-left: 4px solid var(--verde); }
+.tarjeta-stat.borde-amarillo { border-left: 4px solid var(--amarillo); }
+.tarjeta-stat.borde-naranja { border-left: 4px solid var(--naranja); }
+.tarjeta-stat.borde-rojo { border-left: 4px solid var(--rojo); }
+
+.badge-nivel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+}
+
+.badge-nivel.minima { background: var(--verde-claro); color: var(--verde); }
+.badge-nivel.leve { background: var(--amarillo-claro); color: var(--amarillo); }
+.badge-nivel.moderada { background: var(--naranja-claro); color: var(--naranja); }
+.badge-nivel.severa { background: var(--rojo-claro); color: var(--rojo); }
+
+/* ---------- Alerta de severidad ---------- */
+.alerta-severa {
+  background: var(--rojo-claro);
+  border: 1px solid var(--rojo);
+  color: var(--rojo);
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ---------- Paneles / tarjetas de contenido ---------- */
+.panel {
+  background: #fff;
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
+  box-shadow: var(--sombra);
+  padding: 1.25rem 1.4rem;
+}
+
+.panel h5 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* ---------- Tablas ---------- */
+.tabla-clinica thead th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--gris-texto);
+  border-bottom: 2px solid var(--gris-borde);
+  font-weight: 600;
+}
+
+.tabla-clinica td, .tabla-clinica th { vertical-align: middle; }
+
+.fila-clickeable { cursor: pointer; }
+.fila-clickeable:hover { background: var(--azul-claro); }
+
+/* ---------- Buscador ---------- */
+.caja-busqueda {
+  position: relative;
+}
+
+.caja-busqueda input {
+  padding-left: 2.4rem;
+  border-radius: 10px;
+  border: 1px solid var(--gris-borde);
+}
+
+.caja-busqueda i {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gris-texto);
+}
+
+.resultado-paciente {
+  border: 1px solid var(--gris-borde);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.6rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.resultado-paciente:hover {
+  border-color: var(--azul);
+  background: var(--azul-claro);
+}
+
+/* ---------- Botones ---------- */
+.btn-azul {
+  background: var(--azul);
+  border-color: var(--azul);
+  color: #fff;
+}
+.btn-azul:hover { background: var(--azul-oscuro); border-color: var(--azul-oscuro); color: #fff; }
+
+.btn-outline-azul {
+  border-color: var(--azul);
+  color: var(--azul);
+}
+.btn-outline-azul:hover { background: var(--azul); color: #fff; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 991px) {
+  .barra-lateral { transform: translateX(-100%); }
+  .barra-lateral.abierta { transform: translateX(0); }
+  .contenido-principal { margin-left: 0; padding: 1.25rem 1rem 3rem; }
+  .boton-menu-movil { display: inline-flex !important; }
+}
+
+.boton-menu-movil { display: none; }
+
+/* ---------- Impresión ---------- */
+@media print {
+  .barra-lateral, .boton-menu-movil, .no-imprimir { display: none !important; }
+  .contenido-principal { margin-left: 0 !important; }
+}
+
+.oculto { display: none !important; }
+
+
+/* --- Ficha del paciente: dato de nacimiento --- */
+.dato-nacimiento {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--gris-claro, #F2F6F9);
+  border-radius: 10px;
+}
+.dato-nacimiento i { font-size: 1.5rem; color: #1E5F8C; }
+.dato-nacimiento .etiqueta { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .04em; color: #6c757d; }
+.dato-nacimiento .valor { font-weight: 600; }
+
+/* --- Guía didáctica de escalas bajo la gráfica --- */
+.guia-escalas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #dde5ec;
+}
+.guia-columna { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.guia-titulo { font-size: 0.8rem; font-weight: 600; margin-right: 4px; display: inline-flex; align-items: center; gap: 6px; }
+.punto-serie { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+/* --- Aviso sobre la gráfica --- */
+.aviso-grafica {
+  background: #FFF8E6;
+  border: 1px solid #F0DFA8;
+  color: #8a6d1a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+
+/* Unidad "paciente(s)" en tarjetas de niveles */
+.tarjeta-stat .valor .unidad-pacientes {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #6c757d;
+}
+
+
+/* --- Pantalla de login --- */
+.pantalla-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #123B57 0%, #1E5F8C 100%);
+  padding: 20px;
+}
+.tarjeta-login {
+  background: #fff;
+  border-radius: 14px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+.marca-login h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 2px; color: #123B57; }
+.marca-login span { font-size: .85rem; color: #6c757d; }
+.marca-login { margin-bottom: 14px; }
+.btn-azul { background: #1E5F8C; color: #fff; }
+.btn-azul:hover { background: #174a6e; color: #fff; }
