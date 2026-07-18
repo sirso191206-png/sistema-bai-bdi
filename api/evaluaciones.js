@@ -22,6 +22,16 @@ module.exports = async (req, res) => {
         .eq('paciente_id', historial)
         .order('fecha', { ascending: false });
       if (error) throw error;
+
+      // Anexar el consentimiento de cada evaluación (la vista no lo incluye)
+      const { data: consentimientos } = await admin
+        .from('evaluaciones')
+        .select('id,acepto_aviso')
+        .eq('paciente_id', historial);
+      const mapa = {};
+      (consentimientos || []).forEach((c) => { mapa[c.id] = c.acepto_aviso; });
+      (data || []).forEach((h) => { h.acepto_aviso = mapa[h.evaluacion_id] === true; });
+
       return res.status(200).json(data || []);
     }
 

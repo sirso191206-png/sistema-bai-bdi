@@ -379,3 +379,18 @@ body {
   .boton-cerrar-menu { display: block; }
   .barra-lateral { z-index: 999; }
 }
+
+
+/* --- Sello de consentimiento en la ficha --- */
+.sello-consentimiento {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .8rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+.sello-consentimiento.aceptado { background: rgba(25,135,84,.1); color: #198754; }
+.sello-consentimiento.pendiente { background: rgba(255,193,7,.12); color: #8a6d1a; }

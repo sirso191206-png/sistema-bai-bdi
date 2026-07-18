@@ -54,6 +54,9 @@
     <a class="nav-link" data-seccion="buscar"><i class="bi bi-search"></i> Buscar paciente</a>
   </nav>
   <div class="px-3 pb-3">
+    <button class="btn btn-link btn-sm w-100 text-white-50 text-decoration-none mb-1" data-bs-toggle="modal" data-bs-target="#modal-aviso">
+      <i class="bi bi-shield-lock"></i> Aviso de privacidad
+    </button>
     <button id="boton-cerrar-sesion" class="btn btn-outline-light btn-sm w-100 mb-2">
       <i class="bi bi-box-arrow-left"></i> Cerrar sesión
     </button>
@@ -209,6 +212,25 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+
+<!-- ============== MODAL: AVISO DE PRIVACIDAD ============== -->
+<div class="modal fade" id="modal-aviso" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-shield-lock"></i> Protección de datos personales</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body small">
+        <h6>Aplicación de Pruebas Psicológicas</h6>
+        <p>El presente sistema contiene instrumentos de evaluación psicológica utilizados como parte del proceso de atención clínica. Estas pruebas tienen como finalidad identificar la intensidad de síntomas de ansiedad y depresión, así como apoyar la valoración, el seguimiento y la planificación del tratamiento psicológico. Sus resultados no constituyen, por sí solos, un diagnóstico clínico y siempre serán interpretados por un profesional de la salud mental dentro del contexto de la entrevista clínica y demás elementos de evaluación.</p>
+        <h6>Aviso de Privacidad Breve</h6>
+        <p>Los datos personales proporcionados serán utilizados exclusivamente para fines de evaluación, seguimiento clínico y elaboración del expediente psicológico, conforme a la normativa aplicable en materia de protección de datos personales. La información será tratada de manera confidencial y únicamente tendrá acceso el profesional responsable de la atención. Los datos no serán compartidos con terceros sin consentimiento del titular, salvo en los casos previstos por la ley. Al responder los formularios, el paciente manifiesta haber leído y comprendido este aviso de privacidad y autoriza el tratamiento de sus datos para los fines antes descritos.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>

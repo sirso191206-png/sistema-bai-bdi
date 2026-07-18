@@ -195,7 +195,11 @@ function renderFichaPaciente(p) {
   document.getElementById('info-paciente').innerHTML = `
     <h4 class="mb-1">${p.nombre_completo}</h4>
     <div class="text-muted mb-2">Paciente desde ${new Date(p.fecha_registro).toLocaleDateString('es-MX')}</div>
-    ${p.curp ? `<div class="small"><strong>CURP:</strong> <code>${p.curp}</code></div>` : ''}`;
+    <div class="small mb-1"><strong>Fecha de nacimiento:</strong> ${formatearNacimiento(p.fecha_nacimiento)}</div>
+    ${p.curp ? `<div class="small mb-2"><strong>CURP:</strong> <code>${p.curp}</code></div>` : ''}
+    ${p.aviso_aceptado
+      ? `<div class="sello-consentimiento aceptado"><i class="bi bi-shield-check"></i> Aviso de privacidad aceptado por el paciente <span class="text-muted">(${p.aviso_fecha})</span></div>`
+      : `<div class="sello-consentimiento pendiente"><i class="bi bi-shield-exclamation"></i> Sin registro de aceptación del aviso de privacidad</div>`}`;
 
   document.getElementById('boton-exportar-pdf').onclick = async () => {
     const historial = await API.evaluaciones.historial(p.id);
@@ -236,7 +240,7 @@ function renderHistorial(historial) {
   cuerpo.innerHTML = historial.map((h) => `
     <tr class="fila-clickeable" onclick="verDetalleEvaluacion('${h.evaluacion_id}')">
       <td class="fw-semibold text-center">${numeracionAplicaciones[h.evaluacion_id]}ª</td>
-      <td>${h.fecha}</td>
+      <td>${h.fecha} ${h.acepto_aviso ? '<i class="bi bi-shield-check text-success" title="Aviso de privacidad aceptado"></i>' : ''}</td>
       <td>${chipsCuestionarios(h)}</td>
       <td>${h.puntaje_bai ?? '—'}</td>
       <td>${badgeNivel(h.nivel_ansiedad)}</td>
@@ -248,6 +252,20 @@ function renderHistorial(historial) {
         </button>
       </td>
     </tr>`).join('');
+}
+
+function formatearNacimiento(fechaISO) {
+  if (!fechaISO) return '<span class="text-muted">Sin registrar</span>';
+  const fecha = new Date(fechaISO + 'T12:00:00');
+  if (isNaN(fecha.getTime())) return fechaISO;
+  const dd = String(fecha.getDate()).padStart(2, '0');
+  const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+  const texto = `${dd}/${mm}/${fecha.getFullYear()}`;
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - fecha.getFullYear();
+  const m = hoy.getMonth() - fecha.getMonth();
+  if (m < 0 || (m === 0 && hoy.getDate() < fecha.getDate())) edad--;
+  return (edad >= 0 && edad < 120) ? `${texto} <span class="text-muted">(${edad} años)</span>` : texto;
 }
 
 function badgeNivel(nivel) {
