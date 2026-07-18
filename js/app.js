@@ -33,9 +33,24 @@ function configurarNavegacion() {
 }
 
 function configurarMenuMovil() {
+  const barra = document.getElementById('barra-lateral');
+  const fondo = document.getElementById('fondo-menu-movil');
+
+  const cerrar = () => {
+    barra.classList.remove('abierta');
+    fondo.classList.remove('visible');
+  };
+
   document.getElementById('boton-menu-movil')?.addEventListener('click', () => {
-    document.getElementById('barra-lateral').classList.toggle('abierta');
+    barra.classList.toggle('abierta');
+    fondo.classList.toggle('visible', barra.classList.contains('abierta'));
   });
+  document.getElementById('boton-cerrar-menu')?.addEventListener('click', cerrar);
+  fondo?.addEventListener('click', cerrar);
+
+  // Al navegar también se cierra (ya existía para los enlaces, esto cubre el fondo)
+  document.querySelectorAll('.nav-link[data-seccion]').forEach((e) =>
+    e.addEventListener('click', () => fondo.classList.remove('visible')));
 }
 
 // ---------------------------------------------------------------
@@ -193,15 +208,36 @@ function renderFichaPaciente(p) {
   document.getElementById('boton-imprimir').onclick = () => window.print();
 }
 
+let numeracionAplicaciones = {}; // evaluacion_id -> número de aplicación (1 = primera)
+
 function renderHistorial(historial) {
   const cuerpo = document.getElementById('cuerpo-tabla-historial');
   if (!historial || historial.length === 0) {
-    cuerpo.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Aún no hay evaluaciones registradas.</td></tr>';
+    cuerpo.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">Aún no hay evaluaciones registradas.</td></tr>';
     return;
   }
+
+  // Numerar aplicaciones: la más antigua es la #1
+  numeracionAplicaciones = {};
+  const total = historial.length; // historial llega en orden descendente por fecha
+  historial.forEach((h, i) => { numeracionAplicaciones[h.evaluacion_id] = total - i; });
+
+  const chipsCuestionarios = (h) => {
+    const chips = [];
+    chips.push(h.puntaje_bai !== null && h.puntaje_bai !== undefined
+      ? '<span class="chip-cuestionario bai">BAI ✓</span>'
+      : '<span class="chip-cuestionario faltante">BAI —</span>');
+    chips.push(h.puntaje_bdi !== null && h.puntaje_bdi !== undefined
+      ? '<span class="chip-cuestionario bdi">BDI ✓</span>'
+      : '<span class="chip-cuestionario faltante">BDI —</span>');
+    return chips.join(' ');
+  };
+
   cuerpo.innerHTML = historial.map((h) => `
     <tr class="fila-clickeable" onclick="verDetalleEvaluacion('${h.evaluacion_id}')">
+      <td class="fw-semibold text-center">${numeracionAplicaciones[h.evaluacion_id]}ª</td>
       <td>${h.fecha}</td>
+      <td>${chipsCuestionarios(h)}</td>
       <td>${h.puntaje_bai ?? '—'}</td>
       <td>${badgeNivel(h.nivel_ansiedad)}</td>
       <td>${h.puntaje_bdi ?? '—'}</td>
@@ -315,15 +351,22 @@ async function verDetalleEvaluacion(evaluacionId) {
 
   try {
     const detalle = await API.evaluaciones.detalle(evaluacionId);
+    const numAplicacion = numeracionAplicaciones[evaluacionId];
     document.getElementById('titulo-modal-detalle').textContent =
-      `${detalle.paciente.nombre_completo} — ${detalle.fecha}`;
+      `${detalle.paciente.nombre_completo} — ${detalle.fecha}` +
+      (numAplicacion ? ` · ${numAplicacion}ª aplicación` : '');
 
     const columnasBAI = detalle.bai.respuestas.map((r) => `
       <tr><td>${r.numero}. ${r.pregunta}</td><td class="text-end fw-semibold">${r.valor ?? '—'}</td></tr>`).join('');
     const columnasBDI = detalle.bdi.respuestas.map((r) => `
       <tr><td>${r.numero}. ${r.pregunta}</td><td class="text-end fw-semibold">${r.valor ?? '—'}</td></tr>`).join('');
 
+    const lineaAviso = detalle.acepto_aviso
+      ? '<div class="alert alert-success py-2 small mb-3"><i class="bi bi-shield-check"></i> El paciente aceptó el aviso de privacidad al responder.</div>'
+      : '';
+
     document.getElementById('cuerpo-modal-detalle').innerHTML = `
+      ${lineaAviso}
       <div class="row g-4">
         <div class="col-md-6">
           <h6 class="d-flex justify-content-between">
