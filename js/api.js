@@ -27,6 +27,9 @@ const API = (() => {
       async obtener(id) {
         return Auth.fetchAPI('/api/pacientes?id=' + encodeURIComponent(id));
       },
+      async listar() {
+        return Auth.fetchAPI('/api/pacientes?listar=1');
+      },
     },
 
     evaluaciones: {

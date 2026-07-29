@@ -164,11 +164,12 @@ body {
 
 /* ---------- Alerta de severidad ---------- */
 .alerta-severa {
+  position: relative;
   background: var(--rojo-claro);
   border: 1px solid var(--rojo);
   color: var(--rojo);
   border-radius: 10px;
-  padding: 0.9rem 1.1rem;
+  padding: 0.9rem 2.4rem 0.9rem 1.1rem;
   font-size: 0.9rem;
   font-weight: 500;
   display: flex;
@@ -176,6 +177,37 @@ body {
   gap: 0.6rem;
   margin-bottom: 1.25rem;
 }
+.btn-cerrar-alerta {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--rojo);
+  opacity: .6;
+  padding: 4px 6px;
+  line-height: 1;
+}
+.btn-cerrar-alerta:hover { opacity: 1; }
+.chip-alerta-paciente {
+  display: inline-flex;
+  align-items: stretch;
+}
+.chip-alerta-paciente .btn {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.btn-x-chip {
+  border: 1px solid var(--rojo, #dc3545);
+  border-left: none;
+  background: #fff;
+  color: var(--rojo);
+  border-top-right-radius: .375rem;
+  border-bottom-right-radius: .375rem;
+  padding: 0 8px;
+  font-size: .8rem;
+}
+.btn-x-chip:hover { background: var(--rojo-claro); }
 
 /* ---------- Paneles / tarjetas de contenido ---------- */
 .panel {
@@ -394,3 +426,12 @@ body {
 }
 .sello-consentimiento.aceptado { background: rgba(25,135,84,.1); color: #198754; }
 .sello-consentimiento.pendiente { background: rgba(255,193,7,.12); color: #8a6d1a; }
+
+/* --- Tabla ordenable (sección Pacientes) --- */
+.tabla-ordenable thead th[data-campo] {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.tabla-ordenable thead th[data-campo]:hover { color: #1E5F8C; }
+.tabla-ordenable thead th[data-campo] i { font-size: .75rem; margin-left: 3px; }

@@ -26,6 +26,7 @@ function configurarNavegacion() {
 
       if (enlace.dataset.seccion === 'dashboard') cargarDashboard();
       if (enlace.dataset.seccion === 'buscar') document.getElementById('campo-busqueda').focus();
+      if (enlace.dataset.seccion === 'pacientes') cargarListaPacientes();
 
       document.getElementById('barra-lateral').classList.remove('abierta');
     });
@@ -106,25 +107,68 @@ function tarjetaStatHTML({ valor, etiqueta, color }) {
     </div>`;
 }
 
+// Claves de descarte guardadas en este navegador (localStorage), para no
+// volver a mostrar la MISMA alerta (mismo paciente + misma fecha) una vez
+// que el psicólogo la revisó. Si llega una evaluación severa NUEVA (fecha
+// distinta), vuelve a aparecer — nunca se oculta una alerta que no se ha visto.
+function claveDescarte(pacienteId, fecha) {
+  return `alerta_descartada:${pacienteId}:${fecha}`;
+}
+
+function alertaDescartada(pacienteId, fecha) {
+  return localStorage.getItem(claveDescarte(pacienteId, fecha)) === '1';
+}
+
+function descartarAlerta(pacienteId, fecha) {
+  localStorage.setItem(claveDescarte(pacienteId, fecha), '1');
+}
+
+function descartarBannerCompleto(alertas) {
+  alertas.forEach((a) => descartarAlerta(a.paciente_id, a.fecha));
+  document.getElementById('contenedor-alertas').innerHTML = '';
+}
+
 function renderAlertasSeveras(alertas) {
   const contenedor = document.getElementById('contenedor-alertas');
-  if (!alertas || alertas.length === 0) {
+  const pendientes = (alertas || []).filter((a) => !alertaDescartada(a.paciente_id, a.fecha));
+
+  if (pendientes.length === 0) {
     contenedor.innerHTML = '';
     return;
   }
+
+  window.__alertasSeverasActuales = pendientes; // para el botón "descartar todas"
+
   contenedor.innerHTML = `
     <div class="alerta-severa">
+      <button class="btn-cerrar-alerta" title="Descartar todas"
+        onclick="descartarBannerCompleto(window.__alertasSeverasActuales)">
+        <i class="bi bi-x-lg"></i>
+      </button>
       <i class="bi bi-exclamation-triangle-fill mt-1"></i>
-      <div>
-        <strong>${alertas.length} paciente(s)</strong> con ansiedad o depresión severa en los últimos 30 días:
+      <div class="flex-grow-1">
+        <strong>${pendientes.length} paciente(s)</strong> con ansiedad o depresión severa en los últimos 30 días:
         <div class="mt-2 d-flex flex-wrap gap-2">
-          ${alertas.slice(0, 8).map((a) => `
-            <button class="btn btn-sm btn-outline-danger" onclick="abrirPaciente('${a.paciente_id}')">
-              ${a.nombre_completo} — ${a.fecha}
-            </button>`).join('')}
+          ${pendientes.slice(0, 8).map((a) => `
+            <span class="chip-alerta-paciente">
+              <button class="btn btn-sm btn-outline-danger" onclick="abrirPaciente('${a.paciente_id}')">
+                ${a.nombre_completo} — ${a.fecha}
+              </button>
+              <button class="btn-x-chip" title="Descartar este aviso"
+                onclick="event.stopPropagation(); descartarAlertaIndividual('${a.paciente_id}', '${a.fecha}')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>`).join('')}
         </div>
       </div>
     </div>`;
+}
+
+function descartarAlertaIndividual(pacienteId, fecha) {
+  descartarAlerta(pacienteId, fecha);
+  window.__alertasSeverasActuales = (window.__alertasSeverasActuales || [])
+    .filter((a) => !(a.paciente_id === pacienteId && a.fecha === fecha));
+  renderAlertasSeveras(window.__alertasSeverasActuales);
 }
 
 // ---------------------------------------------------------------
@@ -417,3 +461,138 @@ function mostrarErrorGlobal(mensaje) {
       <i class="bi bi-exclamation-circle me-1"></i> ${mensaje}
     </div>`;
 }
+
+// ---------------------------------------------------------------
+// SECCIÓN: PACIENTES (listado completo, ordenable y filtrable)
+// ---------------------------------------------------------------
+let pacientesListaCompleta = [];
+let pacientesOrdenCampo = 'nombre_completo';
+let pacientesOrdenAsc = true;
+let pacientesListaCargada = false;
+
+async function cargarListaPacientes(forzar = false) {
+  if (pacientesListaCargada && !forzar) {
+    renderTablaPacientes();
+    return;
+  }
+  const cuerpo = document.getElementById('cuerpo-tabla-pacientes');
+  cuerpo.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">Cargando pacientes…</td></tr>';
+
+  try {
+    pacientesListaCompleta = await API.pacientes.listar();
+    pacientesListaCargada = true;
+    renderTablaPacientes();
+  } catch (e) {
+    cuerpo.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">${e.message}</td></tr>`;
+  }
+}
+
+function configurarTablaPacientes() {
+  document.querySelectorAll('#tabla-pacientes th[data-campo]').forEach((th) => {
+    th.addEventListener('click', () => {
+      const campo = th.dataset.campo;
+      if (pacientesOrdenCampo === campo) {
+        pacientesOrdenAsc = !pacientesOrdenAsc;
+      } else {
+        pacientesOrdenCampo = campo;
+        pacientesOrdenAsc = true;
+      }
+      renderTablaPacientes();
+    });
+  });
+
+  let temporizador = null;
+  document.getElementById('campo-filtro-pacientes').addEventListener('input', () => {
+    clearTimeout(temporizador);
+    temporizador = setTimeout(renderTablaPacientes, 150);
+  });
+
+  document.getElementById('boton-exportar-pacientes').addEventListener('click', exportarListaPacientesExcel);
+}
+
+function pacientesFiltrados() {
+  const texto = (document.getElementById('campo-filtro-pacientes').value || '').trim().toLowerCase();
+  let lista = pacientesListaCompleta;
+  if (texto.length > 0) {
+    lista = lista.filter((p) =>
+      (p.nombre_completo || '').toLowerCase().includes(texto) ||
+      (p.curp || '').toLowerCase().includes(texto));
+  }
+
+  const campo = pacientesOrdenCampo;
+  const dir = pacientesOrdenAsc ? 1 : -1;
+  lista = [...lista].sort((a, b) => {
+    let va = a[campo], vb = b[campo];
+    if (campo === 'total_aplicaciones') { va = va || 0; vb = vb || 0; }
+    if (va === null || va === undefined) va = '';
+    if (vb === null || vb === undefined) vb = '';
+    if (va < vb) return -1 * dir;
+    if (va > vb) return 1 * dir;
+    return 0;
+  });
+  return lista;
+}
+
+function renderTablaPacientes() {
+  const lista = pacientesFiltrados();
+  const cuerpo = document.getElementById('cuerpo-tabla-pacientes');
+  const mensaje = document.getElementById('mensaje-tabla-pacientes');
+
+  // Indicadores de orden en encabezados
+  document.querySelectorAll('#tabla-pacientes th[data-campo]').forEach((th) => {
+    const icono = th.querySelector('i');
+    if (th.dataset.campo === pacientesOrdenCampo) {
+      icono.className = pacientesOrdenAsc ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
+    } else {
+      icono.className = 'bi bi-arrow-down-up text-muted';
+    }
+  });
+
+  if (lista.length === 0) {
+    cuerpo.innerHTML = '';
+    mensaje.classList.remove('oculto');
+    mensaje.textContent = pacientesListaCompleta.length === 0
+      ? 'Aún no hay pacientes registrados.'
+      : 'Ningún paciente coincide con el filtro.';
+    return;
+  }
+  mensaje.classList.add('oculto');
+
+  cuerpo.innerHTML = lista.map((p) => `
+    <tr class="fila-clickeable" onclick="abrirPaciente('${p.paciente_id}')">
+      <td class="fw-semibold">${p.nombre_completo}</td>
+      <td>${p.curp ? `<code>${p.curp}</code>` : '<span class="text-muted">—</span>'}</td>
+      <td>${p.ultima_fecha || '<span class="text-muted">Sin evaluar</span>'}</td>
+      <td class="text-center">${p.total_aplicaciones ?? 0}</td>
+      <td>${p.nivel_ansiedad ? badgeNivel(p.nivel_ansiedad) : '<span class="text-muted">—</span>'}</td>
+      <td>${p.nivel_depresion ? badgeNivel(p.nivel_depresion) : '<span class="text-muted">—</span>'}</td>
+      <td class="text-center">${p.aviso_aceptado ? '<i class="bi bi-shield-check text-success" title="Aviso de privacidad aceptado"></i>' : '<i class="bi bi-shield-exclamation text-warning" title="Sin registro de aceptación"></i>'}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-azul" onclick="event.stopPropagation(); abrirPaciente('${p.paciente_id}')">
+          Ver ficha
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+function exportarListaPacientesExcel() {
+  const lista = pacientesFiltrados();
+  const filas = lista.map((p) => ({
+    'Nombre y apellidos': p.nombre_completo,
+    'CURP': p.curp || '',
+    'Fecha de nacimiento': p.fecha_nacimiento || '',
+    'Última aplicación': p.ultima_fecha || '',
+    'Aplicaciones totales': p.total_aplicaciones || 0,
+    'BAI (último)': p.puntaje_bai ?? '',
+    'Nivel ansiedad': p.nivel_ansiedad || '',
+    'BDI (último)': p.puntaje_bdi ?? '',
+    'Nivel depresión': p.nivel_depresion || '',
+    'Aviso de privacidad aceptado': p.aviso_aceptado ? 'Sí' : 'No',
+  }));
+  const hoja = XLSX.utils.json_to_sheet(filas);
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, 'Pacientes');
+  XLSX.writeFile(libro, `pacientes_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
+document.addEventListener('DOMContentLoaded', configurarTablaPacientes);

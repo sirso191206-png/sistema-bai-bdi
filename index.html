@@ -51,6 +51,7 @@
   </div>
   <nav class="nav-lateral nav flex-column">
     <a class="nav-link activo" data-seccion="dashboard"><i class="bi bi-grid-1x2-fill"></i> Panel principal</a>
+    <a class="nav-link" data-seccion="pacientes"><i class="bi bi-people-fill"></i> Pacientes</a>
     <a class="nav-link" data-seccion="buscar"><i class="bi bi-search"></i> Buscar paciente</a>
   </nav>
   <div class="px-3 pb-3">
@@ -92,6 +93,44 @@
     <div class="panel">
       <h5><i class="bi bi-cloud-rain"></i> Niveles de depresión (BDI-II) — acumulado</h5>
       <div class="row g-3" id="contenedor-stats-depresion"></div>
+    </div>
+  </section>
+
+  <!-- ---------- SECCIÓN: PACIENTES (listado completo) ---------- -->
+  <section id="seccion-pacientes" class="seccion oculto">
+    <div class="encabezado-pagina">
+      <div>
+        <h2>Pacientes</h2>
+        <p>Lista completa de quiénes han aplicado los cuestionarios.</p>
+      </div>
+      <button class="btn btn-outline-azul btn-sm" id="boton-exportar-pacientes">
+        <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+      </button>
+    </div>
+
+    <div class="panel">
+      <div class="caja-busqueda mb-3">
+        <i class="bi bi-search"></i>
+        <input type="text" id="campo-filtro-pacientes" class="form-control" placeholder="Filtrar por nombre o CURP…">
+      </div>
+      <div class="table-responsive">
+        <table class="table tabla-clinica align-middle tabla-ordenable" id="tabla-pacientes">
+          <thead>
+            <tr>
+              <th data-campo="nombre_completo">Nombre y apellidos <i class="bi bi-arrow-down-up"></i></th>
+              <th data-campo="curp">CURP <i class="bi bi-arrow-down-up"></i></th>
+              <th data-campo="ultima_fecha">Última aplicación <i class="bi bi-arrow-down-up"></i></th>
+              <th data-campo="total_aplicaciones" class="text-center">Aplicaciones <i class="bi bi-arrow-down-up"></i></th>
+              <th>Nivel ansiedad</th>
+              <th>Nivel depresión</th>
+              <th class="text-center">Aviso</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cuerpo-tabla-pacientes"></tbody>
+        </table>
+      </div>
+      <div id="mensaje-tabla-pacientes" class="text-center text-muted py-4 oculto">Aún no hay pacientes registrados.</div>
     </div>
   </section>
 

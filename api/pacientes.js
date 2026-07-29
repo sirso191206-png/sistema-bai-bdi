@@ -3,6 +3,7 @@ const { getAdmin, requireUser, manejarError } = require('./_lib/supabase');
 /**
  * GET /api/pacientes?id=<uuid>      -> un paciente
  * GET /api/pacientes?q=<texto>      -> búsqueda por nombre o CURP
+ * GET /api/pacientes?listar=1       -> listado completo (para la sección Pacientes)
  */
 module.exports = async (req, res) => {
   try {
@@ -10,7 +11,16 @@ module.exports = async (req, res) => {
     if (!user) return;
 
     const admin = getAdmin();
-    const { id, q } = req.query;
+    const { id, q, listar } = req.query;
+
+    if (listar) {
+      const { data, error } = await admin
+        .from('vista_pacientes_listado')
+        .select('*')
+        .order('nombre_completo');
+      if (error) throw error;
+      return res.status(200).json(data || []);
+    }
 
     if (id) {
       const { data, error } = await admin
